@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Angel Choi — CV</title>
+  <style>
+    :root{
+      --bg:#008080;           /* teal desktop */
+      --win:#C0C0C0;          /* window gray */
+      --light:#FFFFFF;        /* highlight */
+      --dark:#808080;         /* shadow */
+      --darker:#000000;       /* black edge */
+      --text:#000000;
+      --accent:#000080;       /* navy selection */
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; font-family: Tahoma, Verdana, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+      color:var(--text); background:var(--bg); overflow:hidden;
+    }
+    /* Desktop */
+    .desktop{position:fixed; inset:0 0 28px 0;}
+    .desktop-icons{position:absolute; top:12px; left:12px; display:grid; grid-template-columns: repeat(auto-fill, 84px); gap:16px;}
+    .icon{width:72px; text-align:center; color:#fff; text-shadow:1px 1px 0 #000; cursor:default; user-select:none; background:none; border:none;}
+    .icon .glyph{width:48px; height:48px; margin:0 auto 6px; background:linear-gradient(135deg,#fff,#b5b5b5); border:2px solid #000; box-shadow: inset -2px -2px 0 #808080, inset 2px 2px 0 #fff;}
+    .icon:focus, .icon:hover{outline:1px dotted #fff;}
+
+    /* Window */
+    .window{
+      position:absolute; min-width:320px; max-width:760px; background:var(--win); box-shadow: 0 0 0 1px var(--darker), 2px 2px 0 0 var(--dark);
+      border-top:2px solid var(--light); border-left:2px solid var(--light); border-right:2px solid var(--dark); border-bottom:2px solid var(--dark);
+      display:none; /* hidden by default, opened via JS */
+    }
+    .window.active{display:block;}
+    .titlebar{display:flex; align-items:center; gap:6px; padding:3px 4px; background:linear-gradient(90deg,#000284,#1f4aaa); color:#fff; cursor:move;}
+    .titlebar .title{font-weight:700; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .control{margin-left:auto; display:flex; gap:2px;}
+    .btn-ctl{width:18px; height:16px; display:grid; place-items:center; background:#C0C0C0; border-top:2px solid #fff; border-left:2px solid #fff; border-right:2px solid #000; border-bottom:2px solid #000; cursor:pointer; align-items: center;justify-content: center;}
+    .btn-ctl:active{border-top:2px solid #000; border-left:2px solid #000; border-right:2px solid #fff; border-bottom:2px solid #fff;}
+    .btn-ctl span{font-size:11px; line-height:1;}
+    .content{padding:10px; background: repeating-conic-gradient(#d8d8d8 0 25%, #c5c5c5 0 50%) 50%/8px 8px, var(--win);} /* subtle 95 texture */
+
+    /* 95 widgets */
+    .group{border:2px groove #dfdfdf; padding:8px; background:#e0e0e0;}
+    h1,h2,h3{font-weight:700; margin:8px 0;}
+    h1{font-size:18px}
+    h2{font-size:15px}
+    p, li{font-size:13px; line-height:1.4}
+    .menu{display:flex; gap:10px; font-size:12px; padding:3px 6px; background:#dcdcdc; border-bottom:2px ridge #fff;}
+    .menu button{border:none; background:transparent; padding:0 2px; cursor:pointer}
+    .menu button:focus{outline:1px dotted #000}
+
+    .grid-two{display:grid; grid-template-columns: 1fr; gap:12px;}
+
+    .list{margin:0; padding-left:18px}
+
+    /* Taskbar */
+    .taskbar{position:fixed; left:0; right:0; bottom:0; height:28px; background:#c0c0c0; display:flex; align-items:center; gap:6px; padding:0 6px; border-top:2px solid #fff; box-shadow: inset 0 2px 0 #808080;}
+    .start{display:flex; align-items:center; gap:6px; background:#c0c0c0; border-top:2px solid #fff; border-left:2px solid #fff; border-right:2px solid #000; border-bottom:2px solid #000; padding:2px 8px; cursor:pointer; font-weight:700}
+    .start:active{border-top:2px solid #000; border-left:2px solid #000; border-right:2px solid #fff; border-bottom:2px solid #fff;}
+    .task-buttons{display:flex; gap:4px; flex:1; overflow:auto;}
+    .task{white-space:nowrap; max-width:220px; text-overflow:ellipsis; overflow:hidden; padding:2px 6px; background:#c0c0c0; border-top:2px solid #fff; border-left:2px solid #fff; border-right:2px solid #000; border-bottom:2px solid #000; cursor:pointer;}
+    .task.active{background:#dfdfdf}
+    .clock{margin-left:auto; font-size:12px; padding:0 8px;}
+
+    /* Start menu */
+    .start-menu{position:fixed; left:6px; bottom:30px; width:220px; background:#c0c0c0; border-top:2px solid #fff; border-left:2px solid #fff; border-right:2px solid #000; border-bottom:2px solid #000; display:none;}
+    .start-header{background:#000080; color:#fff; padding:6px 8px; font-weight:700}
+    .start-item{display:flex; gap:8px; align-items:center; padding:8px; cursor:pointer;}
+    .start-item:hover{background:#000080; color:#fff}
+
+    /* Print styles for PDF export */
+    @media print{
+      body{background:#fff; overflow:visible}
+      .taskbar, .desktop-icons, .start-menu{display:none!important}
+      .window{position:static; width:auto; max-width:none; box-shadow:none; page-break-inside:avoid; display:block!important}
+      .titlebar{background:#000; color:#fff}
+    }
+    .icon-img{
+      width:96px;
+      height:96px;
+      display:block;
+      margin:0;
+      -webkit-user-drag: none;
+    }
+    .icon{
+      width:84px;
+      text-align:center;
+      color:#fff;
+      text-shadow:1px 1px 0 #000;
+      background:none;
+      border:none;
+      padding:0;
+      cursor:pointer;
+      user-select:none;
+    }
+    /* Make each desktop icon a tight vertical stack */
+    .desktop-icons .icon{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;            /*  controls space between image and text */
+      width:84px;
+      padding:0;
+      cursor:pointer;
+    }
+
+    /* Size the image to fit the column  */
+    .desktop-icons .icon .icon-img{
+      width:90px;
+      height:90px;
+      margin:0;
+      -webkit-user-drag:none;
+    }
+
+    /* Tighten label */
+    .desktop-icons .icon > div:last-child{
+      margin:0;
+      line-height:0px;    /* reduces vertical spacing within the label */
+      text-align:center;
+    }
+
+  </style>
+</head>
+<body>
+<div class="desktop">
+  <div class="desktop-icons">
+    <button class="icon" data-open="#win-about" title="Open About" >
+      <img src="Icon_about.png" alt="" class="icon-img" draggable="false">
+      <div>About Me</div>
+    </button>
+    <button class="icon" data-open="#win-experience" title="Open Experience">
+      <img src="Icon_Expeirence.png" alt="" class="icon-img" draggable="false">
+      <div>Experience</div>
+    </button>
+    <button class="icon" data-open="#win-projects" title="Open Projects">
+      <img src="icon_projects.png" alt="" class="icon-img" draggable="false">
+      <div>Projects</div>
+    </button>
+    <button class="icon" data-open="#win-skills" title="Open Skills">
+      <img src="Icon_skills.png" alt="" class="icon-img" draggable="false">
+
+      <div>Skills</div>
+    </button>
+    <button class="icon" data-open="#win-contact" title="Open Contact">
+      <img src="Icon_Contact.png" alt="" class="icon-img" draggable="false">
+
+      <div>Contact</div>
+    </button>
+  </div>
+
+  <!-- Windows -->
+  <section id="win-about" class="window" style="top:100px; left:200px; width:640px;">
+    <header class="titlebar" data-drag>
+      <div class="title">About — Angel Choi.txt</div>
+      <div class="control">
+        <button class="btn-ctl" data-minimize title="Minimize" ><span>–</span></button>
+        <button class="btn-ctl" data-maximize title="Maximize"><span>▢</span></button>
+        <button class="btn-ctl" data-close title="Close"><span>×</span></button>
+      </div>
+    </header>
+    <nav class="menu">
+      <button data-open="#win-experience">File</button>
+      <button data-open="#win-projects">Edit</button>
+      <button data-print>Print</button>
+      <button data-open="#win-contact">Help</button>
+    </nav>
+    <div class="content">
+      <div class="grid-two">
+        <div>
+          <h1>Angel Choi</h1>
+          <p>B.Sc. Information Engineering @ TUM • 3rd semester</p>
+          <div class="group">
+            <p><strong>Email:</strong> <a href="mailto:angel.choi@tum.de">angel.choi@tum.de</a></p>
+            <!--<p><strong>Website:</strong> <a href="#">angelchoi.dev</a> • --><p><strong>GitHub:</strong> <a href="https://github.com/Engel-sudo">Engel-sudo</a></p>
+              <!-- <strong>LinkedIn:</strong> <a href="#">/in/angel</a></p>-->
+            <!-- <p><strong>Location:</strong> Heilbronn, Germany</p> -->
+          </div>
+        </div>
+      </div>
+      <p>Second‑year Information Engineering student at the Technical University of Munich (TUM) with a strong foundation in programming, data management and system design. Passionate about applying AI and software engineering to social and environmental challenges.</p>
+    </div>
+  </section>
+
+  <section id="win-experience" class="window" style="top:120px; left:140px; width:720px;">
+    <header class="titlebar" data-drag>
+      <div class="title">Education/ Experience</div>
+      <div class="control">
+        <button class="btn-ctl" data-minimize title="Minimize"><span>–</span></button>
+        <button class="btn-ctl" data-maximize title="Maximize"><span>▢</span></button>
+        <button class="btn-ctl" data-close title="Close"><span>×</span></button>
+      </div>
+    </header>
+    <div class="content">
+      <article class="group">
+        <h2>Technical University of Munich (TUM), Heilbronn — B.Sc. Information Engineering • Sep 2024 – present</h2>
+        <ul class="list">
+          <li>Core modules include programming (Java), algorithms & data structures, database systems, computer architecture, linear algebra and discrete structures.</li>
+          <li>Built a 2D Maze game using Java and LibGDX framework.</li>
+        </ul>
+      </article>
+      <article class="group" style="margin-top:10px;">
+        <h2>Western Australian Certificate of Education • 2022–2023</h2>
+        <ul class="list">
+          <li>ICT curriculum covered basics of HTML, CSS, JavaScript and SQL.</li>
+          <li>Final project involved designing a fully functional relational database from raw data.</li>
+        </ul>
+      </article>
+      <article class="group">
+        <h2>High school</h2>
+        <ul class="list">
+          <li>ICT curriculum covered HTML, CSS, Database; lots of hands-on tasks</li>
+          <li>Lots of practices with Microsoft 365, including Access</li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="win-projects" class="window" style="top:180px; left:220px; width:680px;">
+    <header class="titlebar" data-drag>
+      <div class="title">Projects</div>
+      <div class="control">
+        <button class="btn-ctl" data-minimize title="Minimize"><span>–</span></button>
+        <button class="btn-ctl" data-maximize title="Maximize"><span>▢</span></button>
+        <button class="btn-ctl" data-close title="Close"><span>×</span></button>
+      </div>
+    </header>
+    <div class="content">
+      <div class="group">
+        <h2>Highlights</h2>
+        <ul class="list">
+          <li><strong>Interactive CV (HTML • CSS)</strong>: this site — draggable windows, taskbar, print‑to‑PDF.</li>
+          <li><strong>MazeRunner (Java • LibGDX)</strong>
+          <ul class="list">
+            <li>Top-down 2D maze game — keyboard controls, collectibles, victory and pause screens.</li>
+            <li>OOP design: Player/Enemy/Map entities, update–render loop, state handling (menu, playing, game-over).</li>
+            <li>Collision + tile map: grid-based walls, and tile-layer collision masks.</li>
+            <li>Camera: smooth follow with clamping.</li>
+            <li>Polish: HUD for score/time, pause, basic SFX; packaged runnable with Gradle.</li>
+          </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="win-skills" class="window" style="top:240px; left:80px; width:520px;">
+    <header class="titlebar" data-drag>
+      <div class="title">Skills</div>
+      <div class="control">
+        <button class="btn-ctl" data-minimize title="Minimize"><span>–</span></button>
+        <button class="btn-ctl" data-maximize title="Maximize"><span>▢</span></button>
+        <button class="btn-ctl" data-close title="Close"><span>×</span></button>
+      </div>
+    </header>
+    <div class="content">
+      <div class="group">
+        <h2>Languages</h2>
+        <p>Java, HTML, CSS, basic JavaScript, SQL</p>
+      </div>
+      <div class="group" style="margin-top:10px;">
+        <h2>Concepts</h2>
+        <p>Data Structures, Algorithms, Testing (JUnit/Mockito), Design Patterns, OS basics</p>
+      </div>
+      <div class="group" style="margin-top:10px;">
+        <h2>Tools</h2>
+        <p>Intellij IDEA, Git, Gradle, LaTeX/Overleaf</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="win-contact" class="window" style="top:320px; left:300px; width:520px;">
+    <header class="titlebar" data-drag>
+      <div class="title">Contact</div>
+      <div class="control">
+        <button class="btn-ctl" data-minimize title="Minimize"><span>–</span></button>
+        <button class="btn-ctl" data-maximize title="Maximize"><span>▢</span></button>
+        <button class="btn-ctl" data-close title="Close"><span>×</span></button>
+      </div>
+    </header>
+    <div class="content">
+      <form class="group" onsubmit="event.preventDefault(); window.location='mailto:angel.choi@tum.de?subject=Hello%20Angel&body='+encodeURIComponent(document.getElementById('msg').value)">
+        <label for="name"><strong>Name</strong></label><br>
+        <input id="name" style="width:100%; margin:4px 0; border:2px inset #fff; height:24px" placeholder="Your name" />
+        <br>
+        <label for="msg"><strong>Message</strong></label><br>
+        <textarea id="msg" style="width:100%; height:120px; margin:4px 0; border:2px inset #fff"></textarea>
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px;">
+          <button class="btn-ctl" type="reset" style="width: 35px"><span>Reset</span></button>
+          <button class="btn-ctl" type="submit" style="width: 35px"><span>Send</span></button>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<!-- Taskbar -->
+<div class="taskbar" role="toolbar" aria-label="Taskbar">
+  <button class="start" id="startButton" aria-haspopup="menu" aria-expanded="false">★ Start</button>
+  <div class="task-buttons" id="taskButtons"></div>
+  <div class="clock" id="clock">--:--</div>
+</div>
+
+<!-- Start Menu -->
+<div class="start-menu" id="startMenu" role="menu">
+  <div class="start-header">Angel Choi</div>
+  <div class="start-item" data-open="#win-about">About Me</div>
+  <div class="start-item" data-open="#win-experience">Experience</div>
+  <div class="start-item" data-open="#win-projects">Projects</div>
+  <div class="start-item" data-open="#win-skills">Skills</div>
+  <div class="start-item" data-open="#win-contact">Contact</div>
+  <div class="start-item" data-print>Print to PDF…</div>
+</div>
+
+<script>
+  let z = 100;
+  function bringToFront(win){
+    win.style.zIndex = ++z;
+  }
+
+  //  Open/Focus window + taskbar button
+  const taskbar = document.getElementById('taskButtons');
+  function ensureTaskButton(win){
+    let id = win.id;
+    let btn = taskbar.querySelector(`[data-task-for="${id}"]`);
+    if(!btn){
+      btn = document.createElement('button');
+      btn.className = 'task';
+      btn.dataset.taskFor = id;
+      btn.textContent = win.querySelector('.title')?.textContent || id;
+      btn.addEventListener('click',()=> openWindow('#'+id, true));
+      taskbar.appendChild(btn);
+    }
+    taskbar.querySelectorAll('.task').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function openWindow(selector, focusOnly=false){
+    const win = document.querySelector(selector);
+    if(!win) return;
+    if(!focusOnly) win.classList.add('active');
+    bringToFront(win);
+    ensureTaskButton(win);
+  }
+
+  function closeWindow(win){
+    win.classList.remove('active');
+    const btn = taskbar.querySelector(`[data-task-for="${win.id}"]`);
+    if(btn) btn.remove();
+  }
+
+  //  Icon / menu open
+  document.querySelectorAll('[data-open]').forEach(el=>{
+    el.addEventListener('click', e=>{
+      const target = el.getAttribute('data-open');
+      if(target) openWindow(target);
+    });
+  });
+
+  //  Window controls & dragging
+  document.querySelectorAll('.window').forEach(win=>{
+    // Bring to front
+    win.addEventListener('mousedown',()=> bringToFront(win));
+
+    // Controls
+    win.querySelector('[data-close]')?.addEventListener('click',()=> closeWindow(win));
+    win.querySelector('[data-minimize]')?.addEventListener('click',()=>{
+      win.classList.remove('active');
+    });
+    win.querySelector('[data-maximize]')?.addEventListener('click',()=>{
+      const desktop = document.querySelector('.desktop');
+      if(win.dataset.max === '1'){
+        // restore
+        win.style.top = win.dataset.prevTop;
+        win.style.left = win.dataset.prevLeft;
+        win.style.width = win.dataset.prevWidth;
+        win.style.height = win.dataset.prevHeight;
+        win.dataset.max = '0';
+      } else {
+        // save
+        win.dataset.prevTop = win.style.top;
+        win.dataset.prevLeft = win.style.left;
+        win.dataset.prevWidth = win.style.width;
+        win.dataset.prevHeight = win.style.height;
+        const rect = desktop.getBoundingClientRect();
+        win.style.top = rect.top + 4 + 'px';
+        win.style.left = rect.left + 4 + 'px';
+        win.style.width = rect.width - 8 + 'px';
+        win.style.height = rect.height - 36 + 'px';
+        win.dataset.max = '1';
+      }
+      bringToFront(win);
+    });
+
+    // Dragging via titlebar
+    const bar = win.querySelector('[data-drag]');
+    if(bar){
+      let ox=0, oy=0, dragging=false;
+      bar.addEventListener('mousedown', (e)=>{
+        dragging = true; bringToFront(win);
+        const rect = win.getBoundingClientRect();
+        ox = e.clientX - rect.left; oy = e.clientY - rect.top;
+        document.body.style.userSelect = 'none';
+      });
+      window.addEventListener('mousemove', (e)=>{
+        if(!dragging) return;
+        win.style.top = (e.clientY - oy) + 'px';
+        win.style.left = (e.clientX - ox) + 'px';
+      });
+      window.addEventListener('mouseup', ()=>{
+        dragging=false; document.body.style.userSelect = '';
+      });
+    }
+  });
+
+  //  Start menu
+  const startBtn = document.getElementById('startButton');
+  const startMenu = document.getElementById('startMenu');
+  function toggleStart(show){
+    const visible = show ?? startMenu.style.display !== 'block';
+    startMenu.style.display = visible ? 'block' : 'none';
+    startBtn.setAttribute('aria-expanded', visible? 'true':'false');
+  }
+  startBtn.addEventListener('click', ()=> toggleStart());
+  document.addEventListener('click', (e)=>{
+    if(!startMenu.contains(e.target) && e.target !== startBtn){
+      startMenu.style.display = 'none';
+      startBtn.setAttribute('aria-expanded','false');
+    }
+  });
+
+  document.querySelectorAll('[data-print]').forEach(b=> b.addEventListener('click', ()=> window.print()));
+
+
+
+  // -------- Clock --------
+  const clock = document.getElementById('clock');
+  function updateClock(){
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mm = String(d.getMinutes()).padStart(2,'0');
+    clock.textContent = `${hh}:${mm}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  //  Open default window on load
+  openWindow('#win-about');
+</script>
+</body>
+</html>
